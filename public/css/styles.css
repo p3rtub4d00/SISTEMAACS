@@ -1,0 +1,41 @@
+body {
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 20px;
+}
+
+.header-sus {
+    background-color: #0056b3; /* Azul SUS */
+    color: white;
+    padding: 15px;
+    border-radius: 5px 5px 0 0;
+    margin-bottom: 20px;
+}
+
+/* REGRAS DE IMPRESSÃO - Oculta menus e botões ao imprimir */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: white;
+    }
+    .container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0;
+    }
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    a {
+        text-decoration: none;
+        color: black;
+    }
+}
