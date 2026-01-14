@@ -1,17 +1,15 @@
 {
-  "name": "sistema-acs-familia",
+  "name": "sistema-acs-simples",
   "version": "1.0.0",
-  "description": "Sistema para Agentes Comunitarios de Saude",
+  "description": "Sistema ACS Sem Banco de Dados",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",
-    "dotenv": "^16.3.1",
     "ejs": "^3.1.9",
-    "express": "^4.18.2",
-    "mongoose": "^7.6.3"
+    "express": "^4.18.2"
   },
   "engines": {
     "node": ">=18.0.0"
