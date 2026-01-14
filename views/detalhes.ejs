@@ -2,13 +2,21 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Ficha do Paciente</title>
+    <title>Ficha Completa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
     <style>
-        .ficha-label { font-weight: bold; color: #555; font-size: 0.9em; }
-        .ficha-value { font-size: 1.1em; border-bottom: 1px solid #ccc; display: block; margin-bottom: 10px; }
-        .alert-health { border: 2px solid red; color: red; font-weight: bold; }
+        body { background: #f9f9f9; }
+        .ficha-box { border: 1px solid #000; padding: 5px; margin-bottom: 5px; background: #fff; }
+        .ficha-label { font-size: 0.7em; font-weight: bold; text-transform: uppercase; color: #555; display: block; }
+        .ficha-value { font-size: 1em; font-weight: bold; color: #000; }
+        .check-box { display: inline-block; width: 15px; height: 15px; border: 1px solid #000; margin-right: 5px; text-align: center; line-height: 12px; font-size: 10px; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff; }
+            .container { max-width: 100%; width: 100%; padding: 0; }
+            .card { border: none; box-shadow: none; }
+        }
     </style>
 </head>
 <body>
@@ -16,95 +24,165 @@
         <div class="d-flex justify-content-between mb-4 no-print">
             <a href="/" class="btn btn-secondary">← Voltar</a>
             <div>
-                <form action="/delete/<%= paciente._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza?');">
+                <form action="/delete/<%= paciente.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja apagar esta ficha?');">
                     <button type="submit" class="btn btn-danger me-2">Excluir</button>
                 </form>
                 <button onclick="window.print()" class="btn btn-primary btn-lg">🖨️ IMPRIMIR FICHA</button>
             </div>
         </div>
 
-        <div class="card p-4">
-            <div class="text-center mb-4 border-bottom pb-3">
-                <h2 class="fw-bold">FICHA DE CADASTRO INDIVIDUAL - ACS</h2>
-                <p>Secretaria Municipal de Saúde</p>
+        <div class="card p-3 border-dark" style="border: 2px solid #000;">
+            
+            <div class="row mb-2 border-bottom border-dark pb-2">
+                <div class="col-2 text-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/SUS_Logo.svg/1200px-SUS_Logo.svg.png" style="width: 80px; opacity: 0.8;">
+                </div>
+                <div class="col-8 text-center">
+                    <h5 class="fw-bold m-0">CADASTRO INDIVIDUAL - ATENÇÃO BÁSICA</h5>
+                    <small>e-SUS APS - FICHA DE DADOS CADASTRAIS</small>
+                </div>
+                <div class="col-2 text-end">
+                    <small>Data: <%= new Date(paciente.criadoEm).toLocaleDateString() %></small>
+                </div>
             </div>
 
-            <div class="row">
-                <div class="col-8">
-                    <span class="ficha-label">NOME COMPLETO:</span>
+            <h6 class="bg-secondary text-white p-1 ps-2 mb-0" style="font-size: 0.8em;">IDENTIFICAÇÃO DO USUÁRIO</h6>
+            <div class="row g-0">
+                <div class="col-3 ficha-box">
+                    <span class="ficha-label">CNS (CARTÃO SUS)</span>
+                    <span class="ficha-value"><%= paciente.cns || '---' %></span>
+                </div>
+                <div class="col-3 ficha-box">
+                    <span class="ficha-label">CPF</span>
+                    <span class="ficha-value"><%= paciente.cpf || '---' %></span>
+                </div>
+                <div class="col-6 ficha-box">
+                    <span class="ficha-label">NOME COMPLETO</span>
                     <span class="ficha-value"><%= paciente.nome %></span>
                 </div>
-                <div class="col-4">
-                    <span class="ficha-label">DATA NASCIMENTO:</span>
-                    <span class="ficha-value">
-                        <%= new Date(paciente.dataNascimento).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %>
-                    </span>
+            </div>
+            <div class="row g-0">
+                <div class="col-3 ficha-box">
+                    <span class="ficha-label">DATA NASCIMENTO</span>
+                    <span class="ficha-value"><%= paciente.dataNascimento.split('-').reverse().join('/') %></span>
+                </div>
+                <div class="col-2 ficha-box">
+                    <span class="ficha-label">SEXO</span>
+                    <span class="ficha-value"><%= paciente.sexo %></span>
+                </div>
+                <div class="col-2 ficha-box">
+                    <span class="ficha-label">RAÇA/COR</span>
+                    <span class="ficha-value"><%= paciente.racaCor %></span>
+                </div>
+                <div class="col-5 ficha-box">
+                    <span class="ficha-label">NOME DA MÃE</span>
+                    <span class="ficha-value"><%= paciente.nomeMae || 'Desconhecido' %></span>
                 </div>
             </div>
 
-            <div class="row mt-2">
-                <div class="col-6">
-                    <span class="ficha-label">NOME DA MÃE:</span>
-                    <span class="ficha-value"><%= paciente.nomeMae || 'Não informado' %></span>
+            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">ENDEREÇO / CONTATO</h6>
+            <div class="row g-0">
+                <div class="col-6 ficha-box">
+                    <span class="ficha-label">LOGRADOURO</span>
+                    <span class="ficha-value"><%= paciente.endereco %></span>
                 </div>
-                <div class="col-6">
-                    <span class="ficha-label">CNS (SUS):</span>
-                    <span class="ficha-value"><%= paciente.cns %></span>
+                <div class="col-2 ficha-box">
+                    <span class="ficha-label">NÚMERO</span>
+                    <span class="ficha-value"><%= paciente.numero %></span>
+                </div>
+                <div class="col-4 ficha-box">
+                    <span class="ficha-label">BAIRRO</span>
+                    <span class="ficha-value"><%= paciente.bairro %></span>
                 </div>
             </div>
-
-            <div class="row mt-2 bg-light p-2 border rounded">
-                <div class="col-3">
-                    <span class="ficha-label">MICROÁREA:</span>
+            <div class="row g-0">
+                <div class="col-2 ficha-box">
+                    <span class="ficha-label">MICROÁREA</span>
                     <span class="ficha-value"><%= paciente.microarea %></span>
                 </div>
-                <div class="col-3">
-                    <span class="ficha-label">FAMÍLIA Nº:</span>
-                    <span class="ficha-value"><%= paciente.familiaId || '-' %></span>
+                <div class="col-2 ficha-box">
+                    <span class="ficha-label">FAMÍLIA Nº</span>
+                    <span class="ficha-value"><%= paciente.familiaId %></span>
+                </div>
+                <div class="col-3 ficha-box">
+                    <span class="ficha-label">TELEFONE</span>
+                    <span class="ficha-value"><%= paciente.telefone %></span>
+                </div>
+                <div class="col-3 ficha-box">
+                    <span class="ficha-label">CEP</span>
+                    <span class="ficha-value"><%= paciente.cep %></span>
+                </div>
+            </div>
+
+            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">SOCIODEMOGRÁFICO</h6>
+            <div class="row g-0">
+                <div class="col-4 ficha-box">
+                    <span class="ficha-label">ESCOLARIDADE</span>
+                    <span class="ficha-value"><%= paciente.escolaridade || '-' %></span>
+                </div>
+                <div class="col-4 ficha-box">
+                    <span class="ficha-label">SITUAÇÃO DE TRABALHO</span>
+                    <span class="ficha-value"><%= paciente.situacaoTrabalho || '-' %></span>
+                </div>
+                <div class="col-4 ficha-box">
+                    <span class="ficha-label">OCUPAÇÃO</span>
+                    <span class="ficha-value"><%= paciente.ocupacao || '-' %></span>
+                </div>
+            </div>
+            <div class="row g-0 p-2 border border-top-0">
+                <div class="col-6">
+                    <span class="check-box"><%= paciente.beneficiarioBolsaFamilia ? 'X' : ' ' %></span> Recebe Bolsa Família?
                 </div>
                 <div class="col-6">
-                    <span class="ficha-label">ENDEREÇO:</span>
-                    <span class="ficha-value"><%= paciente.endereco %>, <%= paciente.numero %> - <%= paciente.bairro %></span>
+                    <span class="check-box"><%= paciente.temPlanoSaude ? 'X' : ' ' %></span> Tem Plano de Saúde Privado?
                 </div>
             </div>
 
-            <div class="mt-4">
-                <h5 class="border-bottom">CONDIÇÕES DE SAÚDE ACOMPANHADAS</h5>
-                <div class="row mt-3 text-center">
-                    <div class="col-3">
-                        <div class="p-2 <%= paciente.hipertenso ? 'alert-health' : 'border' %>">
-                            HIPERTENSO: <%= paciente.hipertenso ? 'SIM' : 'NÃO' %>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="p-2 <%= paciente.diabetico ? 'alert-health' : 'border' %>">
-                            DIABÉTICO: <%= paciente.diabetico ? 'SIM' : 'NÃO' %>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="p-2 <%= paciente.gestante ? 'alert-health' : 'border' %>">
-                            GESTANTE: <%= paciente.gestante ? 'SIM' : 'NÃO' %>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="p-2 <%= paciente.acamado ? 'alert-health' : 'border' %>">
-                            ACAMADO: <%= paciente.acamado ? 'SIM' : 'NÃO' %>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <span class="ficha-label">OBSERVAÇÕES DO AGENTE:</span>
-                <div class="border p-3 mt-2" style="min-height: 100px; background: #fff;">
-                    <%= paciente.observacoes || 'Nenhuma observação registrada.' %>
-                </div>
-            </div>
+            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">CONDIÇÕES DE SAÚDE (PROBLEMAS / CONDIÇÕES AVALIADAS)</h6>
             
-            <div class="mt-5 text-center pt-4 border-top">
-                <p>_______________________________________________________</p>
-                <p>Assinatura do Responsável / Agente Comunitário</p>
+            <div class="row g-0 border border-top-0 p-2">
+                <div class="col-3">
+                    <div class="mb-1"><span class="check-box"><%= paciente.gestante ? 'X' : ' ' %></span> <strong>GESTANTE</strong></div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.hipertenso ? 'X' : ' ' %></span> <strong>HIPERTENSO</strong></div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.diabetico ? 'X' : ' ' %></span> <strong>DIABÉTICO</strong></div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.fumante ? 'X' : ' ' %></span> FUMANTE</div>
+                </div>
+                <div class="col-3">
+                    <div class="mb-1"><span class="check-box"><%= paciente.acamado ? 'X' : ' ' %></span> <strong>ACAMADO</strong></div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.domiciliado ? 'X' : ' ' %></span> DOMICILIADO</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.respiratoria ? 'X' : ' ' %></span> DOENÇA RESPIRATÓRIA</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.alcool ? 'X' : ' ' %></span> USUÁRIO ÁLCOOL</div>
+                </div>
+                <div class="col-3">
+                    <div class="mb-1"><span class="check-box"><%= paciente.cancer ? 'X' : ' ' %></span> CÂNCER</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.hanseniase ? 'X' : ' ' %></span> HANSENÍASE</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.tuberculose ? 'X' : ' ' %></span> TUBERCULOSE</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.drogas ? 'X' : ' ' %></span> OUTRAS DROGAS</div>
+                </div>
+                <div class="col-3">
+                    <div class="mb-1"><span class="check-box"><%= paciente.avc ? 'X' : ' ' %></span> TEVE AVC</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.infarto ? 'X' : ' ' %></span> TEVE INFARTO</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.cardiaco ? 'X' : ' ' %></span> DOENÇA CARDÍACA</div>
+                    <div class="mb-1"><span class="check-box"><%= paciente.rim ? 'X' : ' ' %></span> PROB. RINS</div>
+                </div>
             </div>
+
+            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">OBSERVAÇÕES E ACOMPANHAMENTO</h6>
+            <div class="border border-top-0 p-2" style="min-height: 80px;">
+                <%= paciente.observacoes || 'Sem observações.' %>
+            </div>
+
+            <div class="row mt-4 pt-3">
+                <div class="col-6 text-center">
+                    _______________________________________<br>
+                    Assinatura do Cidadão
+                </div>
+                <div class="col-6 text-center">
+                    _______________________________________<br>
+                    Assinatura do Agente Comunitário
+                </div>
+            </div>
+
         </div>
     </div>
 </body>
