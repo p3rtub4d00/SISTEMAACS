@@ -11,21 +11,17 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// --- FUNÇÕES AUXILIARES PARA LER/SALVAR NO ARQUIVO ---
+// --- FUNÇÕES DE BANCO DE DADOS (ARQUIVO LOCAL) ---
 
-// Função para garantir que o arquivo existe
 const iniciarBanco = () => {
     if (!fs.existsSync(ARQUIVO_BANCO)) {
-        fs.writeFileSync(ARQUIVO_BANCO, JSON.stringify([])); // Cria lista vazia
+        fs.writeFileSync(ARQUIVO_BANCO, JSON.stringify([])); 
     }
 };
 
-// Ler dados do arquivo
 const lerPacientes = () => {
     try {
-        if (!fs.existsSync(ARQUIVO_BANCO)) {
-            iniciarBanco();
-        }
+        if (!fs.existsSync(ARQUIVO_BANCO)) iniciarBanco();
         const data = fs.readFileSync(ARQUIVO_BANCO);
         return JSON.parse(data);
     } catch (error) {
@@ -33,84 +29,114 @@ const lerPacientes = () => {
     }
 };
 
-// Salvar dados no arquivo
 const salvarPacientes = (pacientes) => {
     fs.writeFileSync(ARQUIVO_BANCO, JSON.stringify(pacientes, null, 2));
 };
 
 // --- ROTAS ---
 
-// 1. Tela Inicial
 app.get('/', (req, res) => {
     let pacientes = lerPacientes();
-    
-    // Filtro de busca
     if (req.query.search) {
         const termo = req.query.search.toLowerCase();
         pacientes = pacientes.filter(p => 
             p.nome.toLowerCase().includes(termo) || 
-            p.cns.includes(termo)
+            (p.cpf && p.cpf.includes(termo)) ||
+            (p.cns && p.cns.includes(termo))
         );
     }
-    
-    // Ordenar por nome
-    pacientes.sort((a, b) => a.nome.localeCompare(b.nome));
-    
+    // Ordenar por Microárea e depois Nome
+    pacientes.sort((a, b) => {
+        if (a.microarea === b.microarea) {
+            return a.nome.localeCompare(b.nome);
+        }
+        return a.microarea.localeCompare(b.microarea);
+    });
     res.render('index', { pacientes });
 });
 
-// 2. Tela de Cadastro
 app.get('/cadastro', (req, res) => {
     res.render('cadastro');
 });
 
-// 3. Salvar (POST)
 app.post('/cadastro', (req, res) => {
     const pacientes = lerPacientes();
     
     const novoPaciente = {
-        id: Date.now().toString(), // Gera um ID único baseado na hora
-        nome: req.body.nome,
+        id: Date.now().toString(),
+        
+        // 1. Identificação
+        cpf: req.body.cpf,
         cns: req.body.cns,
+        nome: req.body.nome,
+        nomeSocial: req.body.nomeSocial,
         dataNascimento: req.body.dataNascimento,
+        sexo: req.body.sexo,
+        racaCor: req.body.racaCor,
         nomeMae: req.body.nomeMae,
         telefone: req.body.telefone,
+        nacionalidade: req.body.nacionalidade,
+        
+        // Endereço e Equipe
+        microarea: req.body.microarea,
+        familiaId: req.body.familiaId, // Nº Prontuário Familiar
         endereco: req.body.endereco,
         numero: req.body.numero,
         bairro: req.body.bairro,
-        microarea: req.body.microarea,
-        familiaId: req.body.familiaId,
-        observacoes: req.body.observacoes,
-        // Checkboxes retornam 'on' se marcados, senão undefined
+        cep: req.body.cep,
+
+        // 2. Sociodemográfico
+        escolaridade: req.body.escolaridade,
+        situacaoTrabalho: req.body.situacaoTrabalho,
+        ocupacao: req.body.ocupacao,
+        temPlanoSaude: req.body.temPlanoSaude === 'on',
+        beneficiarioBolsaFamilia: req.body.beneficiarioBolsaFamilia === 'on',
+
+        // 3. Condições de Saúde (Multipla Escolha e Booleanos)
+        peso: req.body.peso, // Peso aproximado ou IMC subjetivo
+        
+        // Doenças / Condições
         hipertenso: req.body.hipertenso === 'on',
         diabetico: req.body.diabetico === 'on',
+        fumante: req.body.fumante === 'on',
+        alcool: req.body.alcool === 'on',
+        drogas: req.body.drogas === 'on',
+        
         gestante: req.body.gestante === 'on',
         acamado: req.body.acamado === 'on',
+        domiciliado: req.body.domiciliado === 'on', // Restrito ao domicilio mas não acamado
+        
+        avc: req.body.avc === 'on',
+        infarto: req.body.infarto === 'on',
+        cardiaco: req.body.cardiaco === 'on', // Doença Cardíaca
+        rim: req.body.rim === 'on', // Doença Renal
+        respiratoria: req.body.respiratoria === 'on', // Asma/DPOC
+        hanseniase: req.body.hanseniase === 'on',
+        tuberculose: req.body.tuberculose === 'on',
+        cancer: req.body.cancer === 'on',
+        
+        internacaoRecente: req.body.internacaoRecente === 'on', // Últimos 12 meses
+        saudeMental: req.body.saudeMental === 'on',
+        
+        // 4. Outros
+        observacoes: req.body.observacoes,
         criadoEm: new Date()
     };
 
     pacientes.push(novoPaciente);
     salvarPacientes(pacientes);
-    
     res.redirect('/');
 });
 
-// 4. Ver Detalhes
 app.get('/paciente/:id', (req, res) => {
     const pacientes = lerPacientes();
     const paciente = pacientes.find(p => p.id === req.params.id);
-    
-    if (paciente) {
-        res.render('detalhes', { paciente });
-    } else {
-        res.redirect('/');
-    }
+    if (paciente) res.render('detalhes', { paciente });
+    else res.redirect('/');
 });
 
-// 5. Deletar
 app.post('/delete/:id', (req, res) => {
     let pacientes = lerPacientes();
-    // Filtra todos MENOS o que tem o ID que queremos deletar
     pacientes = pacientes.filter(p => p.id !== req.params.id);
     salvarPacientes(pacientes);
     res.redirect('/');
@@ -118,6 +144,6 @@ app.post('/delete/:id', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    iniciarBanco(); // Garante que o arquivo existe ao ligar
+    iniciarBanco();
     console.log(`Servidor rodando na porta ${PORT}`);
 });
