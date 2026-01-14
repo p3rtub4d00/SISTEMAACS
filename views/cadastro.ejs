@@ -2,93 +2,225 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Novo Cadastro</title>
+    <title>Cadastro Individual - e-SUS APS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        body { background-color: #f0f2f5; }
+        .section-title {
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .form-check-label { font-size: 0.9em; }
+        .card { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
+    <div class="container mt-4 mb-5">
         <div class="card">
-            <div class="header-sus text-center">
-                <h4>Cadastro Individual / Familiar</h4>
-            </div>
             <div class="card-body">
+                <h3 class="text-center text-primary mb-4">Ficha de Cadastro Individual (e-SUS APS)</h3>
+                
                 <form action="/cadastro" method="POST">
-                    <h5 class="text-primary border-bottom pb-2">Identificação</h5>
-                    <div class="row mb-3">
+                    
+                    <div class="section-title">1. Identificação do Cidadão</div>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">CPF *</label>
+                            <input type="text" name="cpf" class="form-control" placeholder="000.000.000-00">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">CNS (Cartão SUS)</label>
+                            <input type="text" name="cns" class="form-control">
+                        </div>
                         <div class="col-md-6">
-                            <label>Nome Completo</label>
+                            <label class="form-label">Nome Completo *</label>
                             <input type="text" name="nome" class="form-control" required>
                         </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Nome Social</label>
+                            <input type="text" name="nomeSocial" class="form-control">
+                        </div>
                         <div class="col-md-3">
-                            <label>Data Nascimento</label>
+                            <label class="form-label">Data de Nascimento *</label>
                             <input type="date" name="dataNascimento" class="form-control" required>
                         </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Sexo *</label>
+                            <select name="sexo" class="form-select">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
                         <div class="col-md-3">
-                            <label>CNS (Cartão SUS)</label>
-                            <input type="text" name="cns" class="form-control" required>
+                            <label class="form-label">Raça/Cor</label>
+                            <select name="racaCor" class="form-select">
+                                <option value="Parda">Parda</option>
+                                <option value="Branca">Branca</option>
+                                <option value="Preta">Preta</option>
+                                <option value="Amarela">Amarela</option>
+                                <option value="Indígena">Indígena</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nome da Mãe</label>
+                            <input type="text" name="nomeMae" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Telefone Celular</label>
+                            <input type="text" name="telefone" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Nacionalidade</label>
+                            <select name="nacionalidade" class="form-select">
+                                <option value="Brasileira">Brasileira</option>
+                                <option value="Naturalizado">Naturalizado</option>
+                                <option value="Estrangeiro">Estrangeiro</option>
+                            </select>
                         </div>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label>Nome da Mãe</label>
-                        <input type="text" name="nomeMae" class="form-control">
-                    </div>
 
-                    <h5 class="text-primary border-bottom pb-2 mt-4">Localização</h5>
-                    <div class="row mb-3">
+                    <div class="section-title">2. Endereço / Localização</div>
+                    <div class="row g-3">
                         <div class="col-md-2">
-                            <label>Microárea</label>
+                            <label class="form-label fw-bold">Microárea *</label>
                             <input type="text" name="microarea" class="form-control" required>
                         </div>
                         <div class="col-md-2">
-                            <label>Nº Família</label>
+                            <label class="form-label">Nº Prontuário Família</label>
                             <input type="text" name="familiaId" class="form-control">
                         </div>
-                        <div class="col-md-6">
-                            <label>Endereço</label>
+                        <div class="col-md-2">
+                            <label class="form-label">CEP</label>
+                            <input type="text" name="cep" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Logradouro (Rua) *</label>
                             <input type="text" name="endereco" class="form-control" required>
                         </div>
                         <div class="col-md-2">
-                            <label>Número</label>
+                            <label class="form-label">Número</label>
                             <input type="text" name="numero" class="form-control">
                         </div>
-                    </div>
-
-                    <h5 class="text-primary border-bottom pb-2 mt-4">Condições de Saúde (Acompanhamento)</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="hipertenso" id="hip">
-                                <label class="form-check-label" for="hip">Hipertenso</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="diabetico" id="dia">
-                                <label class="form-check-label" for="dia">Diabético</label>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="gestante" id="ges">
-                                <label class="form-check-label" for="ges">Gestante</label>
-                            </div>
-                        </div>
-                         <div class="col-md-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="acamado" id="aca">
-                                <label class="form-check-label" for="aca">Acamado/Deficiente</label>
-                            </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Bairro</label>
+                            <input type="text" name="bairro" class="form-control">
                         </div>
                     </div>
 
+                    <div class="section-title">3. Informações Sociodemográficas</div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Grau de Escolaridade</label>
+                            <select name="escolaridade" class="form-select">
+                                <option value="">Selecione...</option>
+                                <option value="Creche">Creche</option>
+                                <option value="Fundamental Incompleto">Fundamental Incompleto</option>
+                                <option value="Fundamental Completo">Fundamental Completo</option>
+                                <option value="Médio Incompleto">Médio Incompleto</option>
+                                <option value="Médio Completo">Médio Completo</option>
+                                <option value="Superior Completo">Superior Completo</option>
+                                <option value="Não Alfabetizado">Não Alfabetizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Situação no Mercado de Trabalho</label>
+                            <select name="situacaoTrabalho" class="form-select">
+                                <option value="">Selecione...</option>
+                                <option value="Assalariado C/ Carteira">Assalariado C/ Carteira</option>
+                                <option value="Assalariado S/ Carteira">Assalariado S/ Carteira</option>
+                                <option value="Autônomo">Autônomo / Bico</option>
+                                <option value="Desempregado">Desempregado</option>
+                                <option value="Aposentado">Aposentado / Pensionista</option>
+                                <option value="Dona de Casa">Dona de Casa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ocupação (Ex: Pedreiro, Do Lar)</label>
+                            <input type="text" name="ocupacao" class="form-control">
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="beneficiarioBolsaFamilia">
+                                <label class="form-check-label">Recebe Bolsa Família?</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" name="temPlanoSaude">
+                                <label class="form-check-label">Tem Plano de Saúde Privado?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">4. Condições de Saúde (Atenção Básica)</div>
+                    <p class="text-muted text-center"><small>Marque todas as opções que o paciente responder "SIM"</small></p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card p-2 h-100 bg-light">
+                                <h6 class="text-primary">Doenças Crônicas</h6>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="hipertenso"><label>Hipertensão (Pressão Alta)</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="diabetico"><label>Diabetes</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="cardiaco"><label>Doença Cardíaca</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="rim"><label>Problemas nos Rins</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="respiratoria"><label>Doença Respiratória (Asma/DPOC)</label></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card p-2 h-100 bg-light">
+                                <h6 class="text-primary">Hábitos / Histórico</h6>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="fumante"><label>Fumante</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="alcool"><label>Uso de Álcool</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="drogas"><label>Uso de Outras Drogas</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="avc"><label>Teve AVC / Derrame</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="infarto"><label>Teve Infarto</label></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card p-2 h-100 bg-light">
+                                <h6 class="text-primary">Situação Atual</h6>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="gestante"><label>Gestante</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="acamado"><label>Acamado</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="domiciliado"><label>Domiciliado (Não sai de casa)</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="internacaoRecente"><label>Internado nos últimos 12 meses</label></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card p-2 h-100 bg-light">
+                                <h6 class="text-primary">Outros / Transmissíveis</h6>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="hanseniase"><label>Hanseníase</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="tuberculose"><label>Tuberculose</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="cancer"><label>Câncer</label></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" name="saudeMental"><label>Problema Saúde Mental</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Situação de Peso (Auto-referida)</label>
+                            <select name="peso" class="form-select">
+                                <option value="">Selecione...</option>
+                                <option value="Abaixo do Peso">Abaixo do Peso</option>
+                                <option value="Peso Adequado">Peso Adequado</option>
+                                <option value="Sobrepeso">Sobrepeso</option>
+                                <option value="Obesidade">Obesidade</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-title">5. Observações do Agente</div>
                     <div class="mb-3">
-                        <label>Observações</label>
-                        <textarea name="observacoes" class="form-control" rows="3"></textarea>
+                        <textarea name="observacoes" class="form-control" rows="3" placeholder="Ex: Paciente resistente ao tratamento; Precisa de visita médica; Horário preferencial de visita..."></textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success btn-lg w-100">Salvar Cadastro</button>
+                    <button type="submit" class="btn btn-success btn-lg w-100">Salvar Ficha Completa</button>
                     <a href="/" class="btn btn-secondary w-100 mt-2">Voltar</a>
                 </form>
             </div>
