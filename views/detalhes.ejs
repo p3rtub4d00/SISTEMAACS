@@ -21,13 +21,19 @@
 </head>
 <body>
     <div class="container mt-4">
-        <div class="d-flex justify-content-between mb-4 no-print">
-            <a href="/" class="btn btn-secondary">← Voltar</a>
-            <div>
-                <form action="/delete/<%= paciente.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Tem certeza que deseja apagar esta ficha?');">
-                    <button type="submit" class="btn btn-danger me-2">Excluir</button>
-                </form>
-                <button onclick="window.print()" class="btn btn-primary btn-lg">🖨️ IMPRIMIR FICHA</button>
+        <div class="card p-3 mb-4 no-print shadow-sm">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="/" class="btn btn-outline-secondary">← Voltar para o Início</a>
+                
+                <div>
+                    <a href="/editar/<%= paciente.id %>" class="btn btn-warning fw-bold me-2">✏️ Editar Dados</a>
+                    
+                    <button onclick="window.print()" class="btn btn-primary fw-bold me-2">🖨️ Imprimir</button>
+                    
+                    <form action="/delete/<%= paciente.id %>" method="POST" style="display:inline;" onsubmit="return confirm('ATENÇÃO: Isso vai apagar a ficha permanentemente. Confirmar?');">
+                        <button type="submit" class="btn btn-danger">🗑️</button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -61,26 +67,23 @@
                     <span class="ficha-value"><%= paciente.nome %></span>
                 </div>
             </div>
+            
             <div class="row g-0">
                 <div class="col-3 ficha-box">
                     <span class="ficha-label">DATA NASCIMENTO</span>
-                    <span class="ficha-value"><%= paciente.dataNascimento.split('-').reverse().join('/') %></span>
+                    <span class="ficha-value"><%= paciente.dataNascimento ? paciente.dataNascimento.split('-').reverse().join('/') : '-' %></span>
                 </div>
                 <div class="col-2 ficha-box">
                     <span class="ficha-label">SEXO</span>
                     <span class="ficha-value"><%= paciente.sexo %></span>
                 </div>
-                <div class="col-2 ficha-box">
-                    <span class="ficha-label">RAÇA/COR</span>
-                    <span class="ficha-value"><%= paciente.racaCor %></span>
-                </div>
-                <div class="col-5 ficha-box">
+                <div class="col-7 ficha-box">
                     <span class="ficha-label">NOME DA MÃE</span>
                     <span class="ficha-value"><%= paciente.nomeMae || 'Desconhecido' %></span>
                 </div>
             </div>
 
-            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">ENDEREÇO / CONTATO</h6>
+             <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">ENDEREÇO / CONTATO</h6>
             <div class="row g-0">
                 <div class="col-6 ficha-box">
                     <span class="ficha-label">LOGRADOURO</span>
@@ -104,85 +107,20 @@
                     <span class="ficha-label">FAMÍLIA Nº</span>
                     <span class="ficha-value"><%= paciente.familiaId %></span>
                 </div>
-                <div class="col-3 ficha-box">
-                    <span class="ficha-label">TELEFONE</span>
-                    <span class="ficha-value"><%= paciente.telefone %></span>
-                </div>
-                <div class="col-3 ficha-box">
-                    <span class="ficha-label">CEP</span>
-                    <span class="ficha-value"><%= paciente.cep %></span>
-                </div>
-            </div>
-
-            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">SOCIODEMOGRÁFICO</h6>
-            <div class="row g-0">
-                <div class="col-4 ficha-box">
-                    <span class="ficha-label">ESCOLARIDADE</span>
-                    <span class="ficha-value"><%= paciente.escolaridade || '-' %></span>
-                </div>
-                <div class="col-4 ficha-box">
-                    <span class="ficha-label">SITUAÇÃO DE TRABALHO</span>
-                    <span class="ficha-value"><%= paciente.situacaoTrabalho || '-' %></span>
-                </div>
-                <div class="col-4 ficha-box">
-                    <span class="ficha-label">OCUPAÇÃO</span>
-                    <span class="ficha-value"><%= paciente.ocupacao || '-' %></span>
+                 <div class="col-8 ficha-box">
+                    <span class="ficha-label">OBSERVAÇÕES E SAÚDE (RESUMO)</span>
+                    <span class="ficha-value">
+                        <%= paciente.hipertenso ? 'HIPERTENSO ' : '' %>
+                        <%= paciente.diabetico ? 'DIABÉTICO ' : '' %>
+                        <%= paciente.gestante ? 'GESTANTE ' : '' %>
+                        <%= paciente.acamado ? 'ACAMADO ' : '' %>
+                    </span>
                 </div>
             </div>
-            <div class="row g-0 p-2 border border-top-0">
-                <div class="col-6">
-                    <span class="check-box"><%= paciente.beneficiarioBolsaFamilia ? 'X' : ' ' %></span> Recebe Bolsa Família?
-                </div>
-                <div class="col-6">
-                    <span class="check-box"><%= paciente.temPlanoSaude ? 'X' : ' ' %></span> Tem Plano de Saúde Privado?
-                </div>
+             <div class="mt-4 border p-2">
+                <span class="ficha-label">OBSERVAÇÕES DETALHADAS:</span>
+                <p><%= paciente.observacoes %></p>
             </div>
-
-            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">CONDIÇÕES DE SAÚDE (PROBLEMAS / CONDIÇÕES AVALIADAS)</h6>
-            
-            <div class="row g-0 border border-top-0 p-2">
-                <div class="col-3">
-                    <div class="mb-1"><span class="check-box"><%= paciente.gestante ? 'X' : ' ' %></span> <strong>GESTANTE</strong></div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.hipertenso ? 'X' : ' ' %></span> <strong>HIPERTENSO</strong></div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.diabetico ? 'X' : ' ' %></span> <strong>DIABÉTICO</strong></div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.fumante ? 'X' : ' ' %></span> FUMANTE</div>
-                </div>
-                <div class="col-3">
-                    <div class="mb-1"><span class="check-box"><%= paciente.acamado ? 'X' : ' ' %></span> <strong>ACAMADO</strong></div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.domiciliado ? 'X' : ' ' %></span> DOMICILIADO</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.respiratoria ? 'X' : ' ' %></span> DOENÇA RESPIRATÓRIA</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.alcool ? 'X' : ' ' %></span> USUÁRIO ÁLCOOL</div>
-                </div>
-                <div class="col-3">
-                    <div class="mb-1"><span class="check-box"><%= paciente.cancer ? 'X' : ' ' %></span> CÂNCER</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.hanseniase ? 'X' : ' ' %></span> HANSENÍASE</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.tuberculose ? 'X' : ' ' %></span> TUBERCULOSE</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.drogas ? 'X' : ' ' %></span> OUTRAS DROGAS</div>
-                </div>
-                <div class="col-3">
-                    <div class="mb-1"><span class="check-box"><%= paciente.avc ? 'X' : ' ' %></span> TEVE AVC</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.infarto ? 'X' : ' ' %></span> TEVE INFARTO</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.cardiaco ? 'X' : ' ' %></span> DOENÇA CARDÍACA</div>
-                    <div class="mb-1"><span class="check-box"><%= paciente.rim ? 'X' : ' ' %></span> PROB. RINS</div>
-                </div>
-            </div>
-
-            <h6 class="bg-secondary text-white p-1 ps-2 mb-0 mt-2" style="font-size: 0.8em;">OBSERVAÇÕES E ACOMPANHAMENTO</h6>
-            <div class="border border-top-0 p-2" style="min-height: 80px;">
-                <%= paciente.observacoes || 'Sem observações.' %>
-            </div>
-
-            <div class="row mt-4 pt-3">
-                <div class="col-6 text-center">
-                    _______________________________________<br>
-                    Assinatura do Cidadão
-                </div>
-                <div class="col-6 text-center">
-                    _______________________________________<br>
-                    Assinatura do Agente Comunitário
-                </div>
-            </div>
-
         </div>
     </div>
 </body>
