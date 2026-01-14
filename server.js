@@ -6,17 +6,13 @@ const path = require('path');
 const app = express();
 const ARQUIVO_BANCO = path.join(__dirname, 'banco.json');
 
-// Configuração
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// --- FUNÇÕES DE BANCO DE DADOS (ARQUIVO LOCAL) ---
-
+// --- FUNÇÕES DE BANCO ---
 const iniciarBanco = () => {
-    if (!fs.existsSync(ARQUIVO_BANCO)) {
-        fs.writeFileSync(ARQUIVO_BANCO, JSON.stringify([])); 
-    }
+    if (!fs.existsSync(ARQUIVO_BANCO)) fs.writeFileSync(ARQUIVO_BANCO, JSON.stringify([])); 
 };
 
 const lerPacientes = () => {
@@ -24,9 +20,7 @@ const lerPacientes = () => {
         if (!fs.existsSync(ARQUIVO_BANCO)) iniciarBanco();
         const data = fs.readFileSync(ARQUIVO_BANCO);
         return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
+    } catch (error) { return []; }
 };
 
 const salvarPacientes = (pacientes) => {
@@ -35,6 +29,7 @@ const salvarPacientes = (pacientes) => {
 
 // --- ROTAS ---
 
+// 1. Home (Dashboard)
 app.get('/', (req, res) => {
     let pacientes = lerPacientes();
     if (req.query.search) {
@@ -45,89 +40,56 @@ app.get('/', (req, res) => {
             (p.cns && p.cns.includes(termo))
         );
     }
-    // Ordenar por Microárea e depois Nome
-    pacientes.sort((a, b) => {
-        if (a.microarea === b.microarea) {
-            return a.nome.localeCompare(b.nome);
-        }
-        return a.microarea.localeCompare(b.microarea);
-    });
+    // Ordena por Microárea
+    pacientes.sort((a, b) => (a.microarea || '').localeCompare(b.microarea || ''));
     res.render('index', { pacientes });
 });
 
+// 2. Cadastro
 app.get('/cadastro', (req, res) => {
     res.render('cadastro');
 });
 
 app.post('/cadastro', (req, res) => {
     const pacientes = lerPacientes();
+    const novoPaciente = processarDados(req.body, Date.now().toString());
+    novoPaciente.criadoEm = new Date();
     
-    const novoPaciente = {
-        id: Date.now().toString(),
-        
-        // 1. Identificação
-        cpf: req.body.cpf,
-        cns: req.body.cns,
-        nome: req.body.nome,
-        nomeSocial: req.body.nomeSocial,
-        dataNascimento: req.body.dataNascimento,
-        sexo: req.body.sexo,
-        racaCor: req.body.racaCor,
-        nomeMae: req.body.nomeMae,
-        telefone: req.body.telefone,
-        nacionalidade: req.body.nacionalidade,
-        
-        // Endereço e Equipe
-        microarea: req.body.microarea,
-        familiaId: req.body.familiaId, // Nº Prontuário Familiar
-        endereco: req.body.endereco,
-        numero: req.body.numero,
-        bairro: req.body.bairro,
-        cep: req.body.cep,
-
-        // 2. Sociodemográfico
-        escolaridade: req.body.escolaridade,
-        situacaoTrabalho: req.body.situacaoTrabalho,
-        ocupacao: req.body.ocupacao,
-        temPlanoSaude: req.body.temPlanoSaude === 'on',
-        beneficiarioBolsaFamilia: req.body.beneficiarioBolsaFamilia === 'on',
-
-        // 3. Condições de Saúde (Multipla Escolha e Booleanos)
-        peso: req.body.peso, // Peso aproximado ou IMC subjetivo
-        
-        // Doenças / Condições
-        hipertenso: req.body.hipertenso === 'on',
-        diabetico: req.body.diabetico === 'on',
-        fumante: req.body.fumante === 'on',
-        alcool: req.body.alcool === 'on',
-        drogas: req.body.drogas === 'on',
-        
-        gestante: req.body.gestante === 'on',
-        acamado: req.body.acamado === 'on',
-        domiciliado: req.body.domiciliado === 'on', // Restrito ao domicilio mas não acamado
-        
-        avc: req.body.avc === 'on',
-        infarto: req.body.infarto === 'on',
-        cardiaco: req.body.cardiaco === 'on', // Doença Cardíaca
-        rim: req.body.rim === 'on', // Doença Renal
-        respiratoria: req.body.respiratoria === 'on', // Asma/DPOC
-        hanseniase: req.body.hanseniase === 'on',
-        tuberculose: req.body.tuberculose === 'on',
-        cancer: req.body.cancer === 'on',
-        
-        internacaoRecente: req.body.internacaoRecente === 'on', // Últimos 12 meses
-        saudeMental: req.body.saudeMental === 'on',
-        
-        // 4. Outros
-        observacoes: req.body.observacoes,
-        criadoEm: new Date()
-    };
-
     pacientes.push(novoPaciente);
     salvarPacientes(pacientes);
     res.redirect('/');
 });
 
+// 3. Edição (NOVAS ROTAS)
+app.get('/editar/:id', (req, res) => {
+    const pacientes = lerPacientes();
+    const paciente = pacientes.find(p => p.id === req.params.id);
+    if (paciente) {
+        res.render('editar', { paciente });
+    } else {
+        res.redirect('/');
+    }
+});
+
+app.post('/editar/:id', (req, res) => {
+    let pacientes = lerPacientes();
+    const index = pacientes.findIndex(p => p.id === req.params.id);
+    
+    if (index !== -1) {
+        // Mantém a data de criação original e o ID
+        const criadoEmOriginal = pacientes[index].criadoEm;
+        const dadosAtualizados = processarDados(req.body, req.params.id);
+        dadosAtualizados.criadoEm = criadoEmOriginal;
+        
+        pacientes[index] = dadosAtualizados;
+        salvarPacientes(pacientes);
+        res.redirect('/paciente/' + req.params.id);
+    } else {
+        res.redirect('/');
+    }
+});
+
+// 4. Detalhes e Delete
 app.get('/paciente/:id', (req, res) => {
     const pacientes = lerPacientes();
     const paciente = pacientes.find(p => p.id === req.params.id);
@@ -141,6 +103,42 @@ app.post('/delete/:id', (req, res) => {
     salvarPacientes(pacientes);
     res.redirect('/');
 });
+
+// Função Auxiliar para organizar os dados (evita repetir código)
+function processarDados(body, id) {
+    return {
+        id: id,
+        cpf: body.cpf, cns: body.cns, nome: body.nome, nomeSocial: body.nomeSocial,
+        dataNascimento: body.dataNascimento, sexo: body.sexo, racaCor: body.racaCor,
+        nomeMae: body.nomeMae, telefone: body.telefone, nacionalidade: body.nacionalidade,
+        microarea: body.microarea, familiaId: body.familiaId, cep: body.cep,
+        endereco: body.endereco, numero: body.numero, bairro: body.bairro,
+        escolaridade: body.escolaridade, situacaoTrabalho: body.situacaoTrabalho,
+        ocupacao: body.ocupacao, peso: body.peso, observacoes: body.observacoes,
+        
+        // Checkboxes
+        temPlanoSaude: body.temPlanoSaude === 'on',
+        beneficiarioBolsaFamilia: body.beneficiarioBolsaFamilia === 'on',
+        hipertenso: body.hipertenso === 'on',
+        diabetico: body.diabetico === 'on',
+        fumante: body.fumante === 'on',
+        alcool: body.alcool === 'on',
+        drogas: body.drogas === 'on',
+        gestante: body.gestante === 'on',
+        acamado: body.acamado === 'on',
+        domiciliado: body.domiciliado === 'on',
+        avc: body.avc === 'on',
+        infarto: body.infarto === 'on',
+        cardiaco: body.cardiaco === 'on',
+        rim: body.rim === 'on',
+        respiratoria: body.respiratoria === 'on',
+        hanseniase: body.hanseniase === 'on',
+        tuberculose: body.tuberculose === 'on',
+        cancer: body.cancer === 'on',
+        internacaoRecente: body.internacaoRecente === 'on',
+        saudeMental: body.saudeMental === 'on'
+    };
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
