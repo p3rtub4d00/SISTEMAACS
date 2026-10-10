@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Cadastro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style> body { background-color: #fff3cd; } /* Fundo amarelado para indicar Edição */ </style>
@@ -46,6 +47,8 @@
                                 <option value="Parda" <%= paciente.racaCor == 'Parda' ? 'selected' : '' %>>Parda</option>
                                 <option value="Branca" <%= paciente.racaCor == 'Branca' ? 'selected' : '' %>>Branca</option>
                                 <option value="Preta" <%= paciente.racaCor == 'Preta' ? 'selected' : '' %>>Preta</option>
+                                <option value="Amarela" <%= paciente.racaCor == 'Amarela' ? 'selected' : '' %>>Amarela</option>
+                                <option value="Indígena" <%= paciente.racaCor == 'Indígena' ? 'selected' : '' %>>Indígena</option>
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -100,8 +103,9 @@
                             <label>Escolaridade</label>
                             <select name="escolaridade" class="form-select">
                                 <option value="<%= paciente.escolaridade %>" selected><%= paciente.escolaridade %></option>
-                                <option value="Fundamental Incompleto">Fundamental Incompleto</option>
-                                <option value="Médio Completo">Médio Completo</option>
+                                <% ['Creche', 'Fundamental Incompleto', 'Fundamental Completo', 'Médio Incompleto', 'Médio Completo', 'Superior Completo', 'Não Alfabetizado'].forEach(opcao => { %>
+                                    <option value="<%= opcao %>"><%= opcao %></option>
+                                <% }); %>
                                 </select>
                         </div>
                         <div class="col-md-4 pt-4">
@@ -110,6 +114,28 @@
                                 <label>Bolsa Família</label>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <% const adicionais = {
+                            nacionalidade: { nome: 'Nacionalidade', opcoes: ['Brasileira', 'Naturalizado', 'Estrangeiro'] },
+                            situacaoTrabalho: { nome: 'Situação no Mercado de Trabalho', opcoes: ['Assalariado C/ Carteira', 'Assalariado S/ Carteira', 'Autônomo', 'Desempregado', 'Aposentado', 'Dona de Casa'] },
+                            peso: { nome: 'Situação de Peso (Auto-referida)', opcoes: ['Abaixo do Peso', 'Peso Adequado', 'Sobrepeso', 'Obesidade'] }
+                        }; %>
+                        <% Object.entries(adicionais).forEach(([campo, config]) => { %>
+                            <div class="col-md-4">
+                                <label for="<%= campo %>" class="form-label"><%= config.nome %></label>
+                                <select id="<%= campo %>" name="<%= campo %>" class="form-select">
+                                    <option value="">Selecione...</option>
+                                    <% if (paciente[campo] && !config.opcoes.includes(paciente[campo])) { %>
+                                        <option value="<%= paciente[campo] %>" selected><%= paciente[campo] %></option>
+                                    <% } %>
+                                    <% config.opcoes.forEach(opcao => { %>
+                                        <option value="<%= opcao %>" <%= paciente[campo] === opcao ? 'selected' : '' %>><%= opcao %></option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        <% }); %>
                     </div>
 
                     <h6 class="text-secondary border-bottom pb-2 mt-4">Condições de Saúde</h6>
@@ -125,6 +151,20 @@
                         <div class="col-md-3"><input type="checkbox" name="cardiaco" <%= paciente.cardiaco ? 'checked' : '' %>> Cardíaco</div>
                     </div>
 
+                    <div class="row g-2 mt-2">
+                        <% const marcadores = {
+                            temPlanoSaude: 'Plano de saúde', drogas: 'Uso de outras drogas', domiciliado: 'Domiciliado',
+                            avc: 'Teve AVC / Derrame', infarto: 'Teve infarto', rim: 'Problemas nos rins',
+                            hanseniase: 'Hanseníase', tuberculose: 'Tuberculose', cancer: 'Câncer',
+                            internacaoRecente: 'Internado nos últimos 12 meses', saudeMental: 'Problema de saúde mental'
+                        }; %>
+                        <% Object.entries(marcadores).forEach(([campo, nome]) => { %>
+                            <div class="col-md-4 form-check">
+                                <input type="checkbox" id="<%= campo %>" name="<%= campo %>" class="form-check-input" <%= paciente[campo] ? 'checked' : '' %>>
+                                <label for="<%= campo %>" class="form-check-label"><%= nome %></label>
+                            </div>
+                        <% }); %>
+                    </div>
                     <div class="mb-3 mt-4">
                         <label>Observações</label>
                         <textarea name="observacoes" class="form-control" rows="3"><%= paciente.observacoes %></textarea>

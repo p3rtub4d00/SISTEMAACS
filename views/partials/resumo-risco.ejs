@@ -1,0 +1,20 @@
+<% const ultimas = risco.ultimasPorTipo(paciente); %>
+<div class="mb-3">
+    <% if (!ultimas.length) { %>
+        <span class="badge bg-secondary">Risco não avaliado</span>
+    <% } %>
+    <% ultimas.forEach(avaliacao => { %>
+        <div class="mb-2">
+            <span class="badge bg-<%= risco.niveis[avaliacao.nivel].classe %>"><%= risco.tipos[avaliacao.tipo] %>: <%= risco.niveis[avaliacao.nivel].nome %></span>
+            <small class="d-block text-muted">Avaliação profissional de <%= risco.formatarData(avaliacao.dataAvaliacao) %></small>
+            <% if (avaliacao.proximaAvaliacao) { %>
+                <small class="d-block <%= risco.pendencia(avaliacao) === 'atrasada' ? 'text-danger fw-bold' : 'text-muted' %>">
+                    Reavaliar: <%= risco.formatarData(avaliacao.proximaAvaliacao) %>
+                    <%= risco.pendencia(avaliacao) === 'atrasada' ? '— prazo vencido' : risco.pendencia(avaliacao) === 'hoje' ? '— hoje' : '' %>
+                </small>
+            <% } else { %>
+                <small class="d-block text-muted">Próxima avaliação não informada</small>
+            <% } %>
+        </div>
+    <% }); %>
+</div>

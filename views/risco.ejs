@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estratificação de risco — ACS Digital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .texto-registro { white-space: pre-wrap; overflow-wrap: anywhere; }
+        @media print { .no-print { display:none !important; } .card { break-inside:avoid; } }
+    </style>
+</head>
+<body class="bg-light">
+    <main class="container py-4">
+        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3 no-print">
+            <a href="/paciente/<%= paciente.id %>" class="btn btn-outline-secondary">← Voltar à ficha</a>
+            <button type="button" class="btn btn-outline-primary" onclick="window.print()">Imprimir histórico</button>
+        </div>
+        <h1 class="h3">Estratificação de risco</h1>
+        <p class="text-muted"><strong><%= paciente.nome %></strong> · Microárea <%= paciente.microarea || 'não informada' %> · Família <%= paciente.familiaId || 'não informada' %></p>
+        <div class="alert alert-info">
+            Registre a classificação definida pelo profissional responsável conforme o protocolo da unidade.
+            O sistema não calcula escores, não faz diagnóstico e não define prazos de acompanhamento.
+            As avaliações de tipos diferentes permanecem separadas.
+        </div>
+        <% if (salvo) { %><div class="alert alert-success no-print" role="status">Avaliação salva com sucesso. O histórico anterior foi preservado.</div><% } %>
+        <% if (erros.length) { %>
+            <div class="alert alert-danger no-print" role="alert"><strong>Confira os campos:</strong><ul class="mb-0"><% erros.forEach(erro => { %><li><%= erro %></li><% }); %></ul></div>
+        <% } %>
+        <section class="card p-3 mb-4">
+            <h2 class="h5">Classificações atuais por tipo</h2>
+            <%- include('partials/resumo-risco', { paciente }) %>
+            <small class="text-muted">Vale a avaliação com data mais recente de cada tipo. Em datas iguais, vale o último registro.</small>
+        </section>
+
+        <section class="card p-3 mb-4 no-print">
+            <h2 class="h5">Registrar nova avaliação</h2>
+            <p class="text-muted small">Para corrigir uma classificação, registre uma nova avaliação e explique a correção na justificativa. Os registros anteriores são mantidos.</p>
+            <form method="POST" action="/paciente/<%= paciente.id %>/risco">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="tipo" class="form-label">Tipo de avaliação *</label>
+                        <select id="tipo" name="tipo" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <% Object.entries(risco.tipos).forEach(([chave, nome]) => { %>
+                                <option value="<%= chave %>" <%= valores.tipo === chave ? 'selected' : '' %>><%= nome %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="nivel" class="form-label">Classificação registrada pelo profissional *</label>
+                        <select id="nivel" name="nivel" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <% Object.entries(risco.niveis).forEach(([chave, nivel]) => { %>
+                                <option value="<%= chave %>" <%= valores.nivel === chave ? 'selected' : '' %>><%= nivel.nome %></option>
+                            <% }); %>
+                        </select>
+                        <small class="text-muted">Use apenas quando esta categoria corresponder à classificação do protocolo utilizado.</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="dataAvaliacao" class="form-label">Data da avaliação *</label>
+                        <input type="date" id="dataAvaliacao" name="dataAvaliacao" class="form-control" value="<%= valores.dataAvaliacao || '' %>" max="<%= risco.hoje() %>" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="proximaAvaliacao" class="form-label">Próxima avaliação (definida pela equipe)</label>
+                        <input type="date" id="proximaAvaliacao" name="proximaAvaliacao" class="form-control" value="<%= valores.proximaAvaliacao || '' %>">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="profissional" class="form-label">Profissional responsável pela classificação *</label>
+                        <input type="text" id="profissional" name="profissional" class="form-control" value="<%= valores.profissional || '' %>" maxlength="150" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="funcaoProfissional" class="form-label">Função do profissional responsável *</label>
+                        <input type="text" id="funcaoProfissional" name="funcaoProfissional" class="form-control" value="<%= valores.funcaoProfissional || '' %>" maxlength="100" required>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="protocolo" class="form-label">Nome do protocolo utilizado *</label>
+                        <input type="text" id="protocolo" name="protocolo" class="form-control" value="<%= valores.protocolo || '' %>" maxlength="250" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="versaoProtocolo" class="form-label">Versão ou ano do protocolo *</label>
+                        <input type="text" id="versaoProtocolo" name="versaoProtocolo" class="form-control" value="<%= valores.versaoProtocolo || '' %>" maxlength="100" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="justificativa" class="form-label">Justificativa e critérios utilizados *</label>
+                        <textarea id="justificativa" name="justificativa" class="form-control" rows="4" maxlength="3000" required><%= valores.justificativa || '' %></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label for="planoAcompanhamento" class="form-label">Plano de acompanhamento definido pela equipe</label>
+                        <textarea id="planoAcompanhamento" name="planoAcompanhamento" class="form-control" rows="3" maxlength="3000"><%= valores.planoAcompanhamento || '' %></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" id="confirmacao" name="confirmacao" class="form-check-input" required>
+                            <label for="confirmacao" class="form-check-label">Confirmo que estou registrando a classificação realizada pelo profissional responsável, conforme o protocolo informado.</label>
+                        </div>
+                    </div>
+                    <div class="col-12"><button type="submit" class="btn btn-primary w-100">Salvar avaliação no histórico</button></div>
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <h2 class="h4">Histórico de avaliações</h2>
+            <p class="text-muted small">O nome do responsável é informado no registro; ainda não há autenticação para verificar sua identidade.</p>
+            <% const avaliacoes = risco.historico(paciente).slice().reverse(); %>
+            <% if (!avaliacoes.length) { %><p>Nenhuma avaliação registrada. Isso não significa risco baixo.</p><% } %>
+            <% avaliacoes.forEach(avaliacao => { %>
+                <article class="card p-3 mb-3">
+                    <h3 class="h6"><%= risco.tipos[avaliacao.tipo] || avaliacao.tipo %> — <%= (risco.niveis[avaliacao.nivel] || {}).nome || avaliacao.nivel %></h3>
+                    <p class="small mb-2">Avaliação: <%= risco.formatarData(avaliacao.dataAvaliacao) %> · Registro: <%= risco.formatarData(avaliacao.registradoEm) %></p>
+                    <p class="mb-2"><strong>Responsável:</strong> <%= avaliacao.profissional %> · <%= avaliacao.funcaoProfissional %></p>
+                    <p class="mb-2"><strong>Protocolo:</strong> <%= avaliacao.protocolo %> · <%= avaliacao.versaoProtocolo %></p>
+                    <p class="mb-1 fw-bold">Justificativa e critérios</p>
+                    <p class="texto-registro"><%= avaliacao.justificativa %></p>
+                    <% if (avaliacao.planoAcompanhamento) { %><p class="mb-1 fw-bold">Plano de acompanhamento</p><p class="texto-registro"><%= avaliacao.planoAcompanhamento %></p><% } %>
+                    <p class="mb-0"><strong>Próxima avaliação:</strong> <%= risco.formatarData(avaliacao.proximaAvaliacao) %></p>
+                </article>
+            <% }); %>
+        </section>
+    </main>
+</body>
+</html>

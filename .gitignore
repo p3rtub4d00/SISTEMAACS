@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+banco.json
+banco.json.*
+data/
+*.tmp

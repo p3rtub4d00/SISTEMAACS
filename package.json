@@ -1,10 +1,11 @@
 {
   "name": "sistema-acs-simples",
   "version": "1.0.0",
-  "description": "Sistema ACS Sem Banco de Dados",
+  "description": "Cadastro ACS com registro profissional de estratificação de risco",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "body-parser": "^1.20.2",

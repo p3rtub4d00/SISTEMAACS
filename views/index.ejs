@@ -23,14 +23,47 @@
     </nav>
 
     <div class="container">
-        <div class="row justify-content-center mb-4">
-            <div class="col-md-8">
-                <form action="/" method="GET" class="d-flex shadow-sm rounded">
-                    <input type="text" name="search" class="form-control border-0 p-3 rounded-start" placeholder="🔍 Buscar por nome, CPF ou microárea..." style="font-size: 1.1em;">
-                    <button class="btn btn-primary px-4 rounded-end fw-bold" type="submit">BUSCAR</button>
-                </form>
-            </div>
+        <div class="alert alert-info">Estratificação registrada pela equipe, conforme o protocolo informado. Pacientes sem avaliação permanecem como “não avaliados”.</div>
+        <div class="row g-3 mb-4">
+            <% for (const [titulo, valor] of [['Pacientes', resumo.total], ['Avaliados', resumo.avaliados], ['Não avaliados', resumo.naoAvaliados], ['Reavaliação vencida', resumo.atrasados]]) { %>
+                <div class="col-6 col-lg-3"><div class="card p-3 h-100"><span class="text-muted"><%= titulo %></span><strong class="fs-3"><%= valor %></strong></div></div>
+            <% } %>
         </div>
+        <p class="small text-muted">Os contadores consideram todos os pacientes e o tipo de avaliação selecionado. Os demais filtros se aplicam à lista abaixo.</p>
+        <form action="/" method="GET" class="card p-3 mb-4">
+            <div class="row g-3">
+                <div class="col-lg-4">
+                    <label for="search" class="form-label">Buscar paciente</label>
+                    <input id="search" type="text" name="search" value="<%= filtros.search %>" class="form-control" placeholder="Nome, CPF, CNS, microárea ou família">
+                </div>
+                <div class="col-lg-3">
+                    <label for="tipo" class="form-label">Tipo de avaliação</label>
+                    <select id="tipo" name="tipo" class="form-select">
+                        <option value="">Todos os tipos</option>
+                        <% Object.entries(risco.tipos).forEach(([chave, nome]) => { %><option value="<%= chave %>" <%= filtros.tipo === chave ? 'selected' : '' %>><%= nome %></option><% }); %>
+                    </select>
+                </div>
+                <div class="col-lg-2">
+                    <label for="nivel" class="form-label">Classificação</label>
+                    <select id="nivel" name="nivel" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="nao_avaliado" <%= filtros.nivel === 'nao_avaliado' ? 'selected' : '' %>>Não avaliado</option>
+                        <% Object.entries(risco.niveis).forEach(([chave, nivel]) => { %><option value="<%= chave %>" <%= filtros.nivel === chave ? 'selected' : '' %>><%= nivel.nome %></option><% }); %>
+                    </select>
+                </div>
+                <div class="col-lg-3">
+                    <label for="acompanhamento" class="form-label">Reavaliação</label>
+                    <select id="acompanhamento" name="acompanhamento" class="form-select">
+                        <option value="">Todas</option>
+                        <option value="atrasada" <%= filtros.acompanhamento === 'atrasada' ? 'selected' : '' %>>Prazo vencido</option>
+                        <option value="hoje" <%= filtros.acompanhamento === 'hoje' ? 'selected' : '' %>>Hoje</option>
+                        <option value="sem_data" <%= filtros.acompanhamento === 'sem_data' ? 'selected' : '' %>>Sem data definida</option>
+                    </select>
+                </div>
+                <div class="col-12 d-flex gap-2"><button class="btn btn-primary" type="submit">Filtrar</button><a href="/" class="btn btn-outline-secondary">Limpar filtros</a></div>
+            </div>
+        </form>
+        <p class="text-muted small"><%= pacientes.length %> paciente(s) encontrado(s). As classificações de diferentes tipos não são somadas.</p>
 
         <h4 class="mb-3 text-secondary border-bottom pb-2">📂 Meus Cadastros</h4>
 
@@ -58,6 +91,8 @@
                                     <% if(paciente.beneficiarioBolsaFamilia) { %> <span class="badge bg-success tag-alerta">Bolsa Família</span> <% } %>
                                 </div>
 
+                                <%- include('partials/resumo-risco', { paciente }) %>
+                                <a href="/paciente/<%= paciente.id %>/risco" class="btn btn-primary w-100 btn-sm fw-bold mb-2">Estratificação de risco</a>
                                 <a href="/paciente/<%= paciente.id %>" class="btn btn-outline-primary w-100 btn-sm fw-bold">Ver Ficha / Editar</a>
                             </div>
                         </div>
